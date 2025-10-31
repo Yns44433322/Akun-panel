@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akun Panel - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0c0c, #1a1a2e, #16213e);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 40px;
+            width: 400px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeIn 1s ease;
+            z-index: 100;
+        }
+        
+        .admin-container {
+            display: none;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 40px;
+            width: 500px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeIn 1s ease;
+            z-index: 100;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .loading-container {
+            display: none;
+            text-align: center;
+            color: white;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ff416c;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        .permission-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .permission-box {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            border-radius: 15px;
+            padding: 30px;
+            width: 500px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+            border: 2px solid #4a90e2;
+            animation: permissionSlideIn 0.5s ease;
+            color: white;
+        }
+        
+        .permission-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 15px;
+        }
+        
+        .permission-header h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        
+        .permission-content {
+            margin-bottom: 25px;
+        }
+        
+        .permission-content p {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .permission-warning {
+            background: rgba(255, 0, 0, 0.2);
+            border-left: 4px solid #ff4b2b;
+            padding: 10px 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .permission-checkbox {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .permission-checkbox input {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        
+        .permission-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+        
+        .permission-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .permission-deny {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            color: white;
+        }
+        
+        .permission-allow {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            color: white;
+        }
+        
+        .permission-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+        
+        .login-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .login-header p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            color: white;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .login-btn:active {
+            transform: translateY(0);
+        }
+        
+        .admin-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, #2193b0, #6dd5ed);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin-top: 10px;
+        }
+        
+        .admin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .error-message {
+            color: #ff4b2b;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            height: 20px;
+        }
+        
+        .success-message {
+            color: #4CAF50;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            height: 20px;
+        }
+        
+        .security-notice {
+            text-align: center;
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+        }
+        
+        .accounts-list {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .account-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .account-item:last-child {
+            border-bottom: none;
+        }
+        
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            z-index: 10000;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes permissionSlideIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Styling untuk halaman virus (akan ditampilkan setelah login) */
+        .virus-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            color: #f00;
+            cursor: none;
+            touch-action: none;
+            overscroll-behavior: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .blood-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(139, 0, 0, 0.8) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(120, 0, 0, 0.9) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(160, 0, 0, 0.7) 0%, transparent 50%),
+                radial-gradient(circle at 60% 20%, rgba(100, 0, 0, 0.6) 0%, transparent 50%),
+                radial-gradient(circle at 10% 50%, rgba(139, 0, 0, 0.5) 0%, transparent 50%);
+            z-index: 1000;
+            pointer-events: none;
+            animation: bloodPulse 3s infinite;
+        }
+        
+        .blood-splatter {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(139, 0, 0, 0.9) 2%, transparent 5%),
+                radial-gradient(circle at 75% 75%, rgba(139, 0, 0, 0.8) 3%, transparent 6%),
+                radial-gradient(circle at 50% 10%, rgba(139, 0, 0, 0.7) 4%, transparent 7%),
+                radial-gradient(circle at 10% 50%, rgba(139, 0, 0, 0.6) 3%, transparent 5%),
+                radial-gradient(circle at 90% 30%, rgba(139, 0, 0, 0.8) 2%, transparent 4%),
+                radial-gradient(circle at 30% 90%, rgba(139, 0, 0, 0.7) 3%, transparent 5%),
+                radial-gradient(circle at 70% 10%, rgba(139, 0, 0, 0.6) 2%, transparent 4%);
+            z-index: 1001;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        
+        .warning-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #ff0000, #000000);
+            z-index: 900;
+            animation: redFlash 0.05s infinite;
+            mix-blend-mode: screen;
+            pointer-events: none;
+        }
+        
+        .screen-flicker {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            z-index: 850;
+            opacity: 0;
+            animation: flicker 0.03s infinite;
+            pointer-events: none;
+        }
+        
+        .skull {
+            position: absolute;
+            font-size: 200px;
+            color: #fff;
+            text-shadow: 
+                0 0 20px #f00,
+                0 0 40px #f00,
+                0 0 60px #f00,
+                0 0 80px #f00;
+            z-index: 500;
+            animation: skullFloat 15s infinite linear;
+            pointer-events: none;
+            filter: drop-shadow(0 0 15px #f00) brightness(1.2);
+        }
+        
+        .hack-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #f00;
+            font-size: 5rem;
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 
+                0 0 10px #f00,
+                0 0 20px #f00,
+                0 0 30px #f00,
+                0 0 40px #f00;
+            z-index: 600;
+            animation: textGlitch 2s infinite;
+            pointer-events: none;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        
+        .blood-drip {
+            position: absolute;
+            width: 10px;
+            height: 150px;
+            background: linear-gradient(to bottom, 
+                rgba(139, 0, 0, 1) 0%, 
+                rgba(120, 0, 0, 0.9) 20%,
+                rgba(100, 0, 0, 0.8) 40%,
+                rgba(80, 0, 0, 0.7) 60%,
+                rgba(60, 0, 0, 0.6) 80%,
+                rgba(40, 0, 0, 0.5) 100%);
+            border-radius: 0 0 10px 10px;
+            animation: drip 7s linear infinite;
+            pointer-events: none;
+            z-index: 700;
+            box-shadow: 
+                inset 0 0 15px rgba(0, 0, 0, 0.7),
+                0 0 15px rgba(139, 0, 0, 0.8);
+        }
+        
+        .blood-pool {
+            position: absolute;
+            width: 120px;
+            height: 40px;
+            background: radial-gradient(ellipse, 
+                rgba(139, 0, 0, 1) 0%, 
+                rgba(100, 0, 0, 0.8) 40%,
+                rgba(80, 0, 0, 0.6) 70%,
+                transparent 100%);
+            border-radius: 50%;
+            z-index: 699;
+            pointer-events: none;
+            animation: bloodPool 12s infinite;
+        }
+        
+        .error-message-virus {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #f00;
+            padding: 10px;
+            color: #f00;
+            font-size: 1.2rem;
+            z-index: 400;
+            box-shadow: 0 0 15px #f00;
+            animation: errorShake 0.1s infinite;
+            pointer-events: none;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .laugh-text {
+            position: absolute;
+            color: #f00;
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px #f00;
+            z-index: 300;
+            animation: laughFloat 8s infinite;
+            pointer-events: none;
+            opacity: 0;
+        }
+        
+        @keyframes bloodPulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 0.9; }
+            100% { opacity: 0.5; }
+        }
+        
+        @keyframes redFlash {
+            0% { background: radial-gradient(circle, #ff0000, #000000); opacity: 1; }
+            25% { background: radial-gradient(circle, #8b0000, #000000); opacity: 0.8; }
+            50% { background: radial-gradient(circle, #660000, #000000); opacity: 1; }
+            75% { background: radial-gradient(circle, #8b0000, #000000); opacity: 0.8; }
+            100% { background: radial-gradient(circle, #ff0000, #000000); opacity: 1; }
+        }
+        
+        @keyframes flicker {
+            0% { opacity: 0; }
+            25% { opacity: 0.4; }
+            50% { opacity: 0; }
+            75% { opacity: 0.3; }
+            100% { opacity: 0; }
+        }
+        
+        @keyframes skullFloat {
+            0% { 
+                transform: translate(0, 0) rotate(0deg) scale(1);
+                filter: hue-rotate(0deg) drop-shadow(0 0 15px #f00) brightness(1.2);
+            }
+            25% { 
+                transform: translate(calc(100vw - 200px), calc(50vh - 100px)) rotate(90deg) scale(1.3);
+                filter: hue-rotate(90deg) drop-shadow(0 0 20px #f00) brightness(1.5);
+            }
+            50% { 
+                transform: translate(calc(100vw - 200px), calc(100vh - 200px)) rotate(180deg) scale(1);
+                filter: hue-rotate(180deg) drop-shadow(0 0 25px #f00) brightness(1.2);
+            }
+            75% { 
+                transform: translate(0, calc(100vh - 200px)) rotate(270deg) scale(1.4);
+                filter: hue-rotate(270deg) drop-shadow(0 0 20px #f00) brightness(1.6);
+            }
+            100% { 
+                transform: translate(0, 0) rotate(360deg) scale(1);
+                filter: hue-rotate(360deg) drop-shadow(0 0 15px #f00) brightness(1.2);
+            }
+        }
+        
+        @keyframes textGlitch {
+            0% { 
+                transform: translate(-50%, -50%) scale(1) skew(0deg, 0deg);
+                text-shadow: 0 0 10px #f00, 0 0 20px #f00, 0 0 30px #f00, 0 0 40px #f00;
+            }
+            5% { 
+                transform: translate(-50%, -50%) scale(1.2) skew(3deg, 2deg);
+                text-shadow: 8px 0 10px #f00, 15px 0 20px #f00, 20px 0 30px #f00, 25px 0 40px #f00;
+            }
+            10% { 
+                transform: translate(-50%, -50%) scale(1) skew(-2deg, -3deg);
+                text-shadow: -8px 0 10px #0f0, -15px 0 20px #0f0, -20px 0 30px #0f0, -25px 0 40px #0f0;
+            }
+            15% { 
+                transform: translate(-50%, -50%) scale(1.1) skew(0deg, 0deg);
+                text-shadow: 0 8px 10px #f00, 0 15px 20px #f00, 0 20px 30px #f00, 0 25px 40px #f00;
+            }
+            20% { 
+                transform: translate(-50%, -50%) scale(1) skew(2deg, -2deg);
+                text-shadow: 0 -8px 10px #00f, 0 -15px 20px #00f, 0 -20px 30px #00f, 0 -25px 40px #00f;
+            }
+            25% { 
+                transform: translate(-50%, -50%) scale(1.3) skew(0deg, 0deg);
+                text-shadow: 0 0 10px #f00, 0 0 20px #f00, 0 0 30px #f00, 0 0 40px #f00;
+            }
+            30% { 
+                transform: translate(-50%, -50%) scale(1) skew(-1deg, 1deg);
+                text-shadow: 5px 5px 10px #f00, 10px 10px 20px #f00, 15px 15px 30px #f00, 20px 20px 40px #f00;
+            }
+            35% { 
+                transform: translate(-50%, -50%) scale(1.2) skew(0deg, 0deg);
+                text-shadow: -5px -5px 10px #0f0, -10px -10px 20px #0f0, -15px -15px 30px #0f0, -20px -20px 40px #0f0;
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(1) skew(0deg, 0deg);
+                text-shadow: 0 0 10px #f00, 0 0 20px #f00, 0 0 30px #f00, 0 0 40px #f00;
+            }
+        }
+        
+        @keyframes drip {
+            0% { 
+                transform: translateY(-150px); 
+                opacity: 0; 
+                height: 150px;
+            }
+            10% { 
+                transform: translateY(0); 
+                opacity: 1; 
+                height: 150px;
+            }
+            85% { 
+                transform: translateY(100vh); 
+                opacity: 1; 
+                height: 150px;
+            }
+            95% { 
+                transform: translateY(100vh); 
+                opacity: 0.6; 
+                height: 170px;
+            }
+            100% { 
+                transform: translateY(100vh); 
+                opacity: 0; 
+                height: 180px;
+            }
+        }
+        
+        @keyframes bloodPool {
+            0% { opacity: 0; transform: scale(0); }
+            20% { opacity: 0.9; transform: scale(1); }
+            80% { opacity: 0.9; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.3); }
+        }
+        
+        @keyframes errorShake {
+            0% { transform: translate(0) rotate(0deg); }
+            10% { transform: translate(-3px, -3px) rotate(-1deg); }
+            20% { transform: translate(3px, 3px) rotate(1deg); }
+            30% { transform: translate(-3px, 3px) rotate(-1deg); }
+            40% { transform: translate(3px, -3px) rotate(1deg); }
+            50% { transform: translate(-3px, -3px) rotate(-1deg); }
+            60% { transform: translate(3px, 3px) rotate(1deg); }
+            70% { transform: translate(-3px, 3px) rotate(-1deg); }
+            80% { transform: translate(3px, -3px) rotate(1deg); }
+            90% { transform: translate(-3px, -3px) rotate(-1deg); }
+            100% { transform: translate(0) rotate(0deg); }
+        }
+        
+        @keyframes laughFloat {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { transform: translateY(80vh) rotate(5deg); opacity: 1; }
+            30% { transform: translateY(60vh) rotate(-5deg); opacity: 1; }
+            50% { transform: translateY(40vh) rotate(3deg); opacity: 1; }
+            70% { transform: translateY(20vh) rotate(-3deg); opacity: 1; }
+            90% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100px) rotate(0deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-container" id="loadingContainer">
+        <div class="loading-spinner"></div>
+        <h2>Memuat Data...</h2>
+        <p>Harap tunggu sebentar</p>
+    </div>
+
+    <!-- Halaman Login -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-header">
+            <h1>Akun Panel</h1>
+            <p>Masuk ke sistem keamanan tingkat tinggi</p>
+        </div>
+        <div class="input-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Masukkan username">
+        </div>
+        <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Masukkan password">
+        </div>
+        <button class="login-btn" id="loginBtn">Masuk</button>
+        <div class="error-message" id="errorMessage"></div>
+        <div class="security-notice">
+            Sistem keamanan tingkat tinggi - Akses terbatas
+        </div>
+    </div>
+
+    <!-- Halaman Admin -->
+    <div class="admin-container" id="adminContainer">
+        <div class="login-header">
+            <h1>Panel Developer</h1>
+            <p>Kelola akun untuk akses sistem virus</p>
+        </div>
+        
+        <div class="input-group">
+            <label for="newUsername">Username Baru</label>
+            <input type="text" id="newUsername" placeholder="Masukkan username baru">
+        </div>
+        <div class="input-group">
+            <label for="newPassword">Password Baru</label>
+            <input type="password" id="newPassword" placeholder="Masukkan password baru">
+        </div>
+        <button class="admin-btn" id="addAccountBtn">Tambah Akun</button>
+        <div class="success-message" id="successMessage"></div>
+        
+        <div class="accounts-list" id="accountsList">
+            <h3 style="color: white; margin-bottom: 10px;">Daftar Akun</h3>
+            <!-- Daftar akun akan ditampilkan di sini -->
+        </div>
+        
+        <button class="logout-btn" id="adminLogoutBtn">Logout</button>
+    </div>
+
+    <!-- Popup Perizinan -->
+    <div class="permission-container" id="permissionContainer">
+        <div class="permission-box">
+            <div class="permission-header">
+                <h2>Permintaan Izin Keamanan</h2>
+                <p>Sistem memerlukan persetujuan Anda</p>
+            </div>
+            
+            <div class="permission-content">
+                <p>Aplikasi ini memerlukan izin khusus untuk mengakses:</p>
+                <ul style="margin-left: 20px; margin-bottom: 15px;">
+                    <li>Data sistem perangkat</li>
+                    <li>Informasi keamanan</li>
+                    <li>Kontrol akses tingkat administrator</li>
+                </ul>
+                
+                <div class="permission-warning">
+                    <strong>PERINGATAN:</strong> Memberikan akses ini dapat mempengaruhi keamanan sistem Anda. 
+                    Pastikan Anda mempercayai aplikasi ini sebelum melanjutkan.
+                </div>
+                
+                <div class="permission-checkbox">
+                    <input type="checkbox" id="permissionCheckbox">
+                    <label for="permissionCheckbox">Saya memahami risiko dan menyetujui permintaan akses ini</label>
+                </div>
+            </div>
+            
+            <div class="permission-buttons">
+                <button class="permission-btn permission-deny" id="permissionDenyBtn">Tolak</button>
+                <button class="permission-btn permission-allow" id="permissionAllowBtn" disabled>Setujui</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Halaman Virus (akan ditampilkan setelah login) -->
+    <div class="virus-container" id="virusContainer">
+        <button class="logout-btn" id="virusLogoutBtn">Logout</button>
+        
+        <div class="blood-overlay"></div>
+        <div class="blood-splatter"></div>
+        <div class="warning-overlay"></div>
+        <div class="screen-flicker"></div>
+        
+        <!-- Tengkorak bergerak -->
+        <div class="skull">☠️</div>
+        
+        <!-- Tulisan hack -->
+        <div class="hack-text">HP Anda Di hack oleh Nadreth</div>
+        
+        <!-- Efek tetesan darah -->
+        <div class="blood-drips-container"></div>
+        
+        <!-- Container untuk pesan error -->
+        <div class="errors-container"></div>
+        
+        <!-- Container untuk teks ketawa -->
+        <div class="laughs-container"></div>
+    </div>
+
+    <script>
+        // Konfigurasi JSONBin.io
+        const BIN_ID = '6904e9f143b1c97be98ee7da';
+        const X_ACCESS_KEY = '$2a$10$SHcwoX1UvyTD.LU7eZR1Beuok.GBJ0q2.vS0btzDE7dej/QpxznNq';
+        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+        
+        // Elemen DOM
+        const loadingContainer = document.getElementById('loadingContainer');
+        const loginContainer = document.getElementById('loginContainer');
+        const adminContainer = document.getElementById('adminContainer');
+        const permissionContainer = document.getElementById('permissionContainer');
+        const virusContainer = document.getElementById('virusContainer');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const newUsernameInput = document.getElementById('newUsername');
+        const newPasswordInput = document.getElementById('newPassword');
+        const addAccountBtn = document.getElementById('addAccountBtn');
+        const accountsList = document.getElementById('accountsList');
+        const adminLogoutBtn = document.getElementById('adminLogoutBtn');
+        const virusLogoutBtn = document.getElementById('virusLogoutBtn');
+        const permissionCheckbox = document.getElementById('permissionCheckbox');
+        const permissionAllowBtn = document.getElementById('permissionAllowBtn');
+        const permissionDenyBtn = document.getElementById('permissionDenyBtn');
+        const bloodDripsContainer = document.querySelector('.blood-drips-container');
+        const errorsContainer = document.querySelector('.errors-container');
+        const laughsContainer = document.querySelector('.laughs-container');
+        
+        // Kredensial default
+        const defaultAccounts = [
+            { username: "akunseller", password: "12345" }
+        ];
+        
+        // Kredensial developer
+        const developerAccount = { username: "admin", password: "admin123" };
+        
+        // Variabel untuk menyimpan akun
+        let accounts = [];
+        let currentUser = null;
+        
+        // Fungsi untuk menampilkan loading
+        function showLoading() {
+            loadingContainer.style.display = 'flex';
+            loginContainer.style.display = 'none';
+            adminContainer.style.display = 'none';
+            permissionContainer.style.display = 'none';
+            virusContainer.style.display = 'none';
+        }
+        
+        // Fungsi untuk menyembunyikan loading
+        function hideLoading() {
+            loadingContainer.style.display = 'none';
+        }
+        
+        // Fungsi untuk mengambil data dari JSONBin.io
+        async function fetchAccounts() {
+            try {
+                const response = await fetch(`${API_URL}/latest`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Access-Key': X_ACCESS_KEY,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Gagal mengambil data dari server');
+                }
+                
+                const data = await response.json();
+                return data.record.accounts || defaultAccounts;
+            } catch (error) {
+                console.error('Error fetching accounts:', error);
+                // Fallback ke akun default jika gagal mengambil data
+                return defaultAccounts;
+            }
+        }
+        
+        // Fungsi untuk menyimpan data ke JSONBin.io
+        async function saveAccounts(accountsToSave) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'X-Access-Key': X_ACCESS_KEY,
+                        'Content-Type': 'application/json',
+                        'X-Bin-Versioning': 'false'
+                    },
+                    body: JSON.stringify({
+                        accounts: accountsToSave
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Gagal menyimpan data ke server');
+                }
+                
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error saving accounts:', error);
+                throw error;
+            }
+        }
+        
+        // Tampilkan daftar akun
+        function displayAccounts() {
+            accountsList.innerHTML = '<h3 style="color: white; margin-bottom: 10px;">Daftar Akun</h3>';
+            
+            if (accounts.length === 0) {
+                accountsList.innerHTML += '<p style="color: white; text-align: center;">Belum ada akun</p>';
+                return;
+            }
+            
+            accounts.forEach(account => {
+                const accountItem = document.createElement('div');
+                accountItem.className = 'account-item';
+                accountItem.innerHTML = `
+                    <span>${account.username}</span>
+                    <span>${'*'.repeat(account.password.length)}</span>
+                `;
+                accountsList.appendChild(accountItem);
+            });
+        }
+        
+        // Event listener untuk tombol login
+        loginBtn.addEventListener('click', handleLogin);
+        
+        // Event listener untuk tombol enter di login
+        passwordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleLogin();
+            }
+        });
+        
+        // Event listener untuk tombol tambah akun
+        addAccountBtn.addEventListener('click', handleAddAccount);
+        
+        // Event listener untuk tombol enter di form tambah akun
+        newPasswordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleAddAccount();
+            }
+        });
+        
+        // Event listener untuk tombol logout admin
+        adminLogoutBtn.addEventListener('click', function() {
+            adminContainer.style.display = 'none';
+            loginContainer.style.display = 'block';
+            resetForms();
+        });
+        
+        // Event listener untuk tombol logout virus
+        virusLogoutBtn.addEventListener('click', function() {
+            virusContainer.style.display = 'none';
+            loginContainer.style.display = 'block';
+            resetForms();
+        });
+        
+        // Event listener untuk checkbox perizinan
+        permissionCheckbox.addEventListener('change', function() {
+            permissionAllowBtn.disabled = !this.checked;
+        });
+        
+        // Event listener untuk tombol setujui perizinan
+        permissionAllowBtn.addEventListener('click', function() {
+            permissionContainer.style.display = 'none';
+            virusContainer.style.display = 'block';
+            startVirusSimulation();
+        });
+        
+        // Event listener untuk tombol tolak perizinan
+        permissionDenyBtn.addEventListener('click', function() {
+            permissionContainer.style.display = 'none';
+            loginContainer.style.display = 'block';
+            resetForms();
+        });
+        
+        // Fungsi untuk reset form
+        function resetForms() {
+            usernameInput.value = '';
+            passwordInput.value = '';
+            newUsernameInput.value = '';
+            newPasswordInput.value = '';
+            errorMessage.textContent = '';
+            successMessage.textContent = '';
+            permissionCheckbox.checked = false;
+            permissionAllowBtn.disabled = true;
+            currentUser = null;
+        }
+        
+        // Fungsi untuk menangani login
+        async function handleLogin() {
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+            
+            if (!username || !password) {
+                errorMessage.textContent = 'Username dan password harus diisi!';
+                return;
+            }
+            
+            // Cek apakah login sebagai developer
+            if (username === developerAccount.username && password === developerAccount.password) {
+                // Login sebagai developer berhasil
+                loginContainer.style.display = 'none';
+                adminContainer.style.display = 'block';
+                displayAccounts();
+                resetForms();
+                return;
+            }
+            
+            // Cek apakah login sebagai akun biasa
+            const account = accounts.find(acc => acc.username === username && acc.password === password);
+            
+            if (account) {
+                // Login berhasil, simpan user yang sedang login
+                currentUser = account;
+                
+                // Tampilkan popup perizinan untuk akun yang dibuat developer
+                // (kecuali akun default akunseller)
+                if (username !== "akunseller") {
+                    loginContainer.style.display = 'none';
+                    permissionContainer.style.display = 'flex';
+                } else {
+                    // Untuk akun default, langsung ke virus
+                    loginContainer.style.display = 'none';
+                    virusContainer.style.display = 'block';
+                    startVirusSimulation();
+                }
+                
+                resetForms();
+            } else {
+                // Login gagal
+                errorMessage.textContent = 'Username atau password salah!';
+                usernameInput.style.animation = 'shake 0.5s';
+                passwordInput.style.animation = 'shake 0.5s';
+                
+                setTimeout(() => {
+                    usernameInput.style.animation = '';
+                    passwordInput.style.animation = '';
+                }, 500);
+            }
+        }
+        
+        // Fungsi untuk memuat akun dari server
+        async function loadAccounts() {
+            try {
+                showLoading();
+                accounts = await fetchAccounts();
+                hideLoading();
+            } catch (error) {
+                console.error('Error loading accounts:', error);
+                // Fallback ke akun default
+                accounts = defaultAccounts;
+                hideLoading();
+            }
+        }
+        
+        // Fungsi untuk menambah akun baru
+        async function handleAddAccount() {
+            const newUsername = newUsernameInput.value;
+            const newPassword = newPasswordInput.value;
+            
+            if (!newUsername || !newPassword) {
+                successMessage.textContent = 'Username dan password harus diisi!';
+                successMessage.style.color = '#ff4b2b';
+                return;
+            }
+            
+            // Cek apakah username sudah ada
+            const existingAccount = accounts.find(acc => acc.username === newUsername);
+            if (existingAccount) {
+                successMessage.textContent = 'Username sudah ada!';
+                successMessage.style.color = '#ff4b2b';
+                return;
+            }
+            
+            try {
+                showLoading();
+                // Tambah akun baru
+                accounts.push({ username: newUsername, password: newPassword });
+                await saveAccounts(accounts);
+                displayAccounts();
+                
+                successMessage.textContent = 'Akun berhasil ditambahkan!';
+                successMessage.style.color = '#4CAF50';
+                
+                newUsernameInput.value = '';
+                newPasswordInput.value = '';
+                
+                setTimeout(() => {
+                    successMessage.textContent = '';
+                }, 3000);
+            } catch (error) {
+                successMessage.textContent = 'Gagal menyimpan akun ke server!';
+                successMessage.style.color = '#ff4b2b';
+                
+                // Kembalikan ke state sebelumnya
+                accounts.pop();
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Fungsi untuk memulai simulasi virus
+        function startVirusSimulation() {
+            // Blokir semua event input
+            document.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }, { passive: false });
+            
+            document.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }, { passive: false });
+            
+            document.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }, { passive: false });
+            
+            document.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }, { passive: false });
+            
+            // Buat efek tetesan darah
+            createBloodDrips();
+            
+            // Buat genangan darah
+            createBloodPools();
+            
+            // Buat pesan error
+            createErrorMessages();
+            
+            // Buat teks ketawa
+            createLaughTexts();
+            
+            // Putar suara menyeramkan
+            playScarySounds();
+        }
+        
+        // Fungsi untuk membuat efek tetesan darah
+        function createBloodDrips() {
+            setInterval(() => {
+                const drip = document.createElement('div');
+                drip.className = 'blood-drip';
+                drip.style.left = Math.random() * 100 + 'vw';
+                drip.style.width = (Math.random() * 8 + 6) + 'px';
+                drip.style.height = (Math.random() * 100 + 120) + 'px';
+                drip.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                drip.style.animationDelay = (Math.random() * 2) + 's';
+                bloodDripsContainer.appendChild(drip);
+                
+                setTimeout(() => {
+                    if (drip.parentNode) {
+                        bloodDripsContainer.removeChild(drip);
+                    }
+                }, 12000);
+            }, 300);
+        }
+        
+        // Fungsi untuk membuat genangan darah
+        function createBloodPools() {
+            setInterval(() => {
+                const pool = document.createElement('div');
+                pool.className = 'blood-pool';
+                pool.style.left = Math.random() * 90 + 'vw';
+                pool.style.top = Math.random() * 90 + 'vh';
+                pool.style.width = (Math.random() * 100 + 80) + 'px';
+                pool.style.height = (Math.random() * 30 + 25) + 'px';
+                pool.style.animationDuration = (Math.random() * 8 + 10) + 's';
+                virusContainer.appendChild(pool);
+                
+                setTimeout(() => {
+                    if (pool.parentNode) {
+                        virusContainer.removeChild(pool);
+                    }
+                }, 18000);
+            }, 2000);
+        }
+        
+        // Fungsi untuk membuat pesan error
+        function createErrorMessages() {
+            setInterval(() => {
+                const errorMessages = [
+                    'ERROR: SYSTEM FAILURE',
+                    'CRITICAL ERROR: MEMORY CORRUPTED',
+                    'VIRUS DETECTED: TROJAN.EXE',
+                    'FATAL EXCEPTION: 0x000000EF',
+                    'SYSTEM32 CORRUPTED',
+                    'BOOT SECTOR INFECTED',
+                    'HARD DRIVE FAILURE',
+                    'DATA THEFT IN PROGRESS',
+                    'RANSOMWARE ACTIVATED',
+                    'FIREWALL BREACHED',
+                    'NETWORK INTRUSION DETECTED',
+                    'ENCRYPTION KEYS STOLEN',
+                    'BIOS COMPROMISED',
+                    'IRREVERSIBLE DAMAGE DETECTED'
+                ];
+                
+                const error = document.createElement('div');
+                error.className = 'error-message-virus';
+                error.textContent = errorMessages[Math.floor(Math.random() * errorMessages.length)];
+                error.style.left = Math.random() * 80 + 'vw';
+                error.style.top = Math.random() * 80 + 'vh';
+                error.style.fontSize = (Math.random() * 10 + 14) + 'px';
+                error.style.color = `rgb(${Math.random() * 100 + 155}, 0, 0)`;
+                errorsContainer.appendChild(error);
+                
+                setTimeout(() => {
+                    if (error.parentNode) {
+                        errorsContainer.removeChild(error);
+                    }
+                }, 8000);
+            }, 1000);
+        }
+        
+        // Fungsi untuk membuat teks ketawa
+        function createLaughTexts() {
+            setInterval(() => {
+                const laugh = document.createElement('div');
+                laugh.className = 'laugh-text';
+                laugh.textContent = 'HAHAHAHA';
+                laugh.style.left = Math.random() * 90 + 'vw';
+                laugh.style.fontSize = (Math.random() * 20 + 20) + 'px';
+                laugh.style.color = `rgb(${Math.random() * 100 + 155}, 0, 0)`;
+                laugh.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                laugh.style.animationDelay = (Math.random() * 2) + 's';
+                laughsContainer.appendChild(laugh);
+                
+                setTimeout(() => {
+                    if (laugh.parentNode) {
+                        laughsContainer.removeChild(laugh);
+                    }
+                }, 10000);
+            }, 500);
+        }
+        
+        // Fungsi untuk memutar suara menyeramkan
+        function playScarySounds() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Buat noise putih untuk backsound
+                function createWhiteNoise() {
+                    const bufferSize = 2 * audioContext.sampleRate;
+                    const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+                    const output = noiseBuffer.getChannelData(0);
+                    
+                    for (let i = 0; i < bufferSize; i++) {
+                        output[i] = Math.random() * 2 - 1;
+                    }
+                    
+                    const whiteNoise = audioContext.createBufferSource();
+                    whiteNoise.buffer = noiseBuffer;
+                    whiteNoise.loop = true;
+                    
+                    const filter = audioContext.createBiquadFilter();
+                    filter.type = 'bandpass';
+                    filter.frequency.value = 200;
+                    filter.Q.value = 1;
+                    
+                    const gainNode = audioContext.createGain();
+                    gainNode.gain.value = 0.15;
+                    
+                    whiteNoise.connect(filter);
+                    filter.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    whiteNoise.start();
+                }
+                
+                // Buat suara bernada rendah yang menyeramkan
+                function createCreepyTone() {
+                    const oscillator = audioContext.createOscillator();
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.value = 50;
+                    
+                    const gainNode = audioContext.createGain();
+                    gainNode.gain.value = 0.12;
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.start();
+                    
+                    // Ubah frekuensi secara acak
+                    setInterval(() => {
+                        oscillator.frequency.value = 30 + Math.random() * 40;
+                    }, 1500);
+                }
+                
+                // Buat suara teriakan menyeramkan
+                function createScreamingSound() {
+                    setInterval(() => {
+                        if (Math.random() < 0.25) {
+                            const oscillator = audioContext.createOscillator();
+                            oscillator.type = 'sine';
+                            
+                            const gainNode = audioContext.createGain();
+                            gainNode.gain.value = 0;
+                            
+                            // Buat pola teriakan dengan mengubah frekuensi dan gain
+                            const startTime = audioContext.currentTime;
+                            
+                            // Frekuensi naik dengan cepat untuk efek teriakan
+                            oscillator.frequency.setValueAtTime(150, startTime);
+                            oscillator.frequency.exponentialRampToValueAtTime(1000, startTime + 0.6);
+                            oscillator.frequency.exponentialRampToValueAtTime(150, startTime + 2);
+                            
+                            // Gain naik dan turun untuk efek teriakan
+                            gainNode.gain.setValueAtTime(0, startTime);
+                            gainNode.gain.linearRampToValueAtTime(0.5, startTime + 0.4);
+                            gainNode.gain.linearRampToValueAtTime(0.3, startTime + 1.2);
+                            gainNode.gain.linearRampToValueAtTime(0, startTime + 2);
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+                            
+                            oscillator.start();
+                            oscillator.stop(startTime + 2);
+                        }
+                    }, 6000);
+                }
+                
+                // Buat suara ketawa tengkorak
+                function createSkullLaugh() {
+                    setInterval(() => {
+                        if (Math.random() < 0.4) {
+                            const oscillator = audioContext.createOscillator();
+                            oscillator.type = 'sine';
+                            
+                            const gainNode = audioContext.createGain();
+                            gainNode.gain.value = 0;
+                            
+                            // Buat pola ketawa dengan mengubah frekuensi
+                            const startTime = audioContext.currentTime;
+                            const frequencies = [200, 400, 300, 500, 350, 450, 400, 600];
+                            
+                            frequencies.forEach((freq, index) => {
+                                oscillator.frequency.setValueAtTime(freq, startTime + index * 0.1);
+                            });
+                            
+                            // Gain untuk efek ketawa
+                            gainNode.gain.setValueAtTime(0, startTime);
+                            gainNode.gain.linearRampToValueAtTime(0.4, startTime + 0.2);
+                            gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.6);
+                            gainNode.gain.linearRampToValueAtTime(0, startTime + 0.9);
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+                            
+                            oscillator.start();
+                            oscillator.stop(startTime + 0.9);
+                        }
+                    }, 5000);
+                }
+                
+                createWhiteNoise();
+                createCreepyTone();
+                createScreamingSound();
+                createSkullLaugh();
+            } catch (e) {
+                console.log('Audio tidak didukung:', e);
+            }
+        }
+        
+        // Inisialisasi aplikasi
+        async function init() {
+            await loadAccounts();
+            loginContainer.style.display = 'block';
+        }
+        
+        // Jalankan inisialisasi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
